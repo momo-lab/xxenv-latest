@@ -56,4 +56,6 @@ Print, but not install the latest 2.7-based version of Python
 
     $ pyenv latest --print 2.7
     2.7.15
-    
+
+## License
+MIT
