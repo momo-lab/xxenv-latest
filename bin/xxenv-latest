@@ -1,0 +1,143 @@
+#!/usr/bin/env bash
+# Usage: *env latest <command> [<args>]
+#        *env latest -p|--print [<version-prefix>]
+#        *env latest -P|--print-installed [<version-prefix>]
+#        *env latest -h|--help
+#        *env latest -v|--version
+#
+#   *env is pyenv, rbenv, etc...
+#
+#   -p/--print              Show latest version
+#   -P/--print_installed    Show installed latest version
+#
+# Supported *env commands:
+#   install
+#   global
+#   local
+#   prefix
+set -e
+[ -n "$PYENV_DEBUG" ] && set -b
+
+XXENV_LATEST_VERSION="0.1.0"
+DEFAULT_QUERY="[0-9]"
+
+COMMAND=${0##*/}; COMMAND=${COMMAND%%-*}
+SUBCOMMAND="$1"
+
+# Provide pyenv completions
+if [ "$1" = "--complete" ]; then
+    shift 1
+    if [[ -z $1 ]]; then
+        echo install
+        echo global
+        echo local
+        echo prefix
+        echo --print
+        echo --print-installed
+        echo --help
+        echo --version
+    else
+        SUBCOMMAND=$1
+        shift 1
+        $COMMAND $SUBCOMMAND --complete $*
+    fi
+    exit
+fi
+
+abort() {
+    {
+        if [ "$#" -eq 0 ]; then
+            cat -
+        else
+            echo "$COMMAND: $*"
+        fi
+    } >&2
+    exit 1
+}
+
+version() {
+  echo "xxenv-latest ${XXENV_LATEST_VERSION}"
+}
+
+get_server_version() {
+  local query=$1
+  [[ -z $query ]] && query=$DEFAULT_QUERY
+  $COMMAND install --list \
+    | grep -vE "(^Available versions:|-src|-dev|[-\.]rc|-alpha|-beta|[-\.]pre|(a|b)[0-9]+)" \
+    | grep -E "^\s*$query" \
+    | sed 's/^\s\+//' \
+    | sort --version-sort \
+    | tail -1
+}
+
+get_local_version() {
+  local query=$1
+  [[ -z $query ]] && query=$DEFAULT_QUERY
+  $COMMAND versions \
+    | sed -e 's/^\*//' -e 's/^\s*//' -e 's/ (set by.*$//' \
+    | grep -E "$query" \
+    | sort --version-sort \
+    | tail -1
+}
+
+print_version() {
+    local version=$(get_$1_version $2)
+    [[ -z $version ]] && abort "This version is not found."
+    echo "Latest installed version is '$version'"
+}
+
+latest() {
+    local getcmd=get_$1_version; shift 1
+    local new_args
+    local version
+    for arg; do
+        case "$arg" in
+            -*)
+                new_args="$new_args $arg"
+                ;;
+            *)
+                version=$($getcmd $arg)
+                [[ -z $version ]] && abort "This version is not found."
+                new_args="$new_args $version"
+                ;;
+        esac
+        shift 1
+    done
+    if [[ -z $version ]]; then
+        version=$($getcmd)
+        [[ -z $version ]] && abort "This version is not found."
+        new_args="$new_args $version"
+    fi
+
+    echo "Latest version is '$version'"
+    $COMMAND $SUBCOMMAND $new_args
+}
+
+shift 1
+case "$SUBCOMMAND" in
+    "")
+        version
+        $COMMAND help latest
+        ;;
+    -h | --help)
+        $COMMAND help latest
+        ;;
+    -v | --version)
+        version
+        ;;
+    -p | --print)
+        print_version server $*
+        ;;
+    -P | --print-installed)
+        print_version local $*
+        ;;
+    install)
+        latest server $*
+        ;;
+    global | local | prefix)
+        latest local $*
+        ;;
+    *)
+        abort "no such command \`$SUBCOMMAND'"
+        ;;
+esac
