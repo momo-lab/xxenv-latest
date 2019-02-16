@@ -83,7 +83,7 @@ get_local_version() {
 print_version() {
     local version=$(get_$1_version $2)
     [[ -z $version ]] && abort "This version is not found."
-    echo "Latest installed version is '$version'"
+    echo $version
 }
 
 latest() {
