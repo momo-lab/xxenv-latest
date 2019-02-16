@@ -12,6 +12,7 @@
 #
 # Supported *env commands:
 #   install
+#   uninstall (All except the latest version)
 #   global
 #   local
 #   prefix
@@ -70,14 +71,17 @@ get_server_version() {
     | tail -1
 }
 
-get_local_version() {
+get_local_versions() {
   local query=$1
   [[ -z $query ]] && query=$DEFAULT_QUERY
   $COMMAND versions \
     | sed -e 's/^\*//' -e 's/^\s*//' -e 's/ (set by.*$//' \
     | grep -E "$query" \
-    | sort --version-sort \
-    | tail -1
+    | sort --version-sort
+}
+
+get_local_version() {
+    get_local_versions $* | tail -1
 }
 
 print_version() {
@@ -113,6 +117,23 @@ latest() {
     $COMMAND $SUBCOMMAND $new_args
 }
 
+uninstall_not_latest() {
+    for arg; do
+        case "$arg" in
+            -*)
+                new_args="$new_args $arg"
+                ;;
+            *)
+                version_prefix=$arg
+                ;;
+        esac
+        shift 1
+    done
+    for version in $(get_local_versions $version_prefix | head --lines=-1); do
+        $COMMAND uninstall $new_args $version
+    done
+}
+
 shift 1
 case "$SUBCOMMAND" in
     "")
@@ -133,6 +154,9 @@ case "$SUBCOMMAND" in
         ;;
     install)
         latest server $*
+        ;;
+    uninstall)
+        uninstall_not_latest $*
         ;;
     global | local | prefix)
         latest local $*

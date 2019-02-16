@@ -16,6 +16,7 @@ Replaces '**env' with 'pyenv', 'rbenv', etc.
 
 Supported commands is:
 - install
+- uninstall (All except the latest version)
 - global
 - local
 - prefix
@@ -46,6 +47,22 @@ Install 2.7-based version of Python.
     -> https://www.python.org/ftp/python/2.7.15/Python-2.7.15.tar.xz
     Installing Python-2.7.15...
     Installed Python-2.7.15 to /home/username/.pyenv/versions/2.7.15
+
+Uninstall all expect the latest 2.7-based version of Python.
+
+    $ pyenv versions
+      2.7.13
+      2.7.14
+      2.7.15
+      3.7.1
+    * 3.7.2 (set by /home/username/.pyenv/version)
+    $ pyenv latest uninstall 2.7
+    pyenv: remove /home/username/.pyenv/versions/2.7.13? y
+    pyenv: remove /home/username/.pyenv/versions/2.7.14? y
+    $ pyenv versions
+      2.7.15
+      3.7.1
+    * 3.7.2 (set by /home/username/.pyenv/versions/2.7.15)
 
 Set the global Python latest version.
 
