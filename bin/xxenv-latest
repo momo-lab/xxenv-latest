@@ -76,7 +76,7 @@ get_local_versions() {
   [[ -z $query ]] && query=$DEFAULT_QUERY
   $COMMAND versions \
     | sed -e 's/^\*//' -e 's/^\s*//' -e 's/ (set by.*$//' \
-    | grep -E "$query" \
+    | grep -E "^\s*$query" \
     | sort --version-sort
 }
 
