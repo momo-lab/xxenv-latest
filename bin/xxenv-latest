@@ -74,8 +74,9 @@ get_server_version() {
 get_local_versions() {
   local query=$1
   [[ -z $query ]] && query=$DEFAULT_QUERY
-  $COMMAND versions \
+  $COMMAND versions --skip-aliases \
     | sed -e 's/^\*//' -e 's/^\s*//' -e 's/ (set by.*$//' \
+    | grep -v "/envs" \
     | grep -E "^\s*$query" \
     | sort --version-sort
 }
