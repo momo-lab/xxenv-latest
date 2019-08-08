@@ -7,6 +7,7 @@ This **env plugin replaces the version specified in the argument with the latest
 - [pyenv](https://github.com/pyenv/pyenv)
 - [rbenv](https://github.com/rbenv/rbenv) (Required [ruby-build](https://github.com/rbenv/ruby-build) to use ```rbenv latest install``` or ```rbenv latest uninstall```)
 - [nodenv](https://github.com/nodenv/nodenv) (Required [node-build](https://github.com/nodenv/node-build) to use ```nodenv latest install``` or ```nodenv latest uninstall```)
+- [goenv](https://github.com/syndbg/goenv)
 
 ## Usage
 
