@@ -87,7 +87,7 @@ get_local_version() {
 
 print_version() {
     local version=$(get_$1_version $2)
-    [[ -z $version ]] && abort "This version is not found."
+    [[ -z $version ]] && abort "Version '$2' is not found."
     echo $version
 }
 
@@ -102,7 +102,7 @@ latest() {
                 ;;
             *)
                 version=$($getcmd $arg)
-                [[ -z $version ]] && abort "This version is not found."
+                [[ -z $version ]] && abort "Version '$arg' is not found."
                 new_args="$new_args $version"
                 ;;
         esac
@@ -110,7 +110,7 @@ latest() {
     done
     if [[ -z $version ]]; then
         version=$($getcmd)
-        [[ -z $version ]] && abort "This version is not found."
+        [[ -z $version ]] && abort "Version is not found."
         new_args="$new_args $version"
     fi
 
