@@ -130,7 +130,7 @@ uninstall_not_latest() {
         esac
         shift 1
     done
-    for version in $(get_local_versions $version_prefix | head --lines=-1); do
+    for version in $(get_local_versions $version_prefix | sed '$ d'); do
         $COMMAND uninstall $new_args $version
     done
 }
