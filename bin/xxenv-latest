@@ -66,7 +66,7 @@ get_server_version() {
   $COMMAND install --list \
     | grep -vE "(^Available versions:|-src|-dev|-latest|-stm|[-\.]rc|-alpha|-beta|[-\.]pre|-next|(a|b|c)[0-9]+|snapshot|master)" \
     | grep -E "^\s*$query" \
-    | sed 's/^\s\+//' \
+    | sed 's/^[[:space:]]*//' \
     | sort --version-sort \
     | tail -1
 }
@@ -75,7 +75,7 @@ get_local_versions() {
   local query=$1
   [[ -z $query ]] && query=$DEFAULT_QUERY
   $COMMAND versions --skip-aliases \
-    | sed -e 's/^\*//' -e 's/^\s*//' -e 's/ (set by.*$//' \
+    | sed -e 's/^\*//' -e 's/^[[:space:]]*//' -e 's/ (set by.*$//' \
     | grep -v "/envs" \
     | grep -E "^\s*$query" \
     | sort --version-sort
