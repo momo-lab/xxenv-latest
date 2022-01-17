@@ -16,6 +16,11 @@
 #   global
 #   local
 #   prefix
+#
+# Original subcommands:
+#   update-major            Update the major version of the currently active version
+#   update-minor            Update the minor version of the currently active version
+#   update-revision         Update the revision of the currently active version
 set -e
 [ -n "$PYENV_DEBUG" ] && set -b
 
@@ -33,6 +38,9 @@ if [ "$1" = "--complete" ]; then
         echo global
         echo local
         echo prefix
+        echo update-major
+        echo update-minor
+        echo update-revision
         echo --print
         echo --print-installed
         echo --help
@@ -141,6 +149,32 @@ uninstall_not_latest() {
     done
 }
 
+update() {
+    local version_type=$1; shift
+    local mode=local
+    local now_version=$($COMMAND local 2> /dev/null)
+    if [[ -z "$now_version" ]]; then
+        mode=global
+        now_version=$($COMMAND global)
+    fi
+    [[ "$now_version" == "system" ]] && abort "Curretly version is 'system'."
+    case "$version_type" in
+        major)
+            local query=$(echo $now_version | sed -e 's/[0-9]\+\.[0-9]\+\.[0-9]\+$//')
+            ;;
+        minor)
+            local query=$(echo $now_version | sed -e 's/\.[0-9]\+\.[0-9]\+$//')
+            ;;
+        revision)
+            local query=$(echo $now_version | sed -e 's/\.[0-9]\+$//')
+            ;;
+    esac
+    local new_version=$(print_version server $query)
+    echo "Latest version is '$new_version'"
+    $COMMAND install --skip-existing $new_version
+    $COMMAND $mode $new_version
+}
+
 shift 1
 case "$SUBCOMMAND" in
     "")
@@ -167,6 +201,15 @@ case "$SUBCOMMAND" in
         ;;
     global | local | prefix)
         latest local $*
+        ;;
+    update-major)
+        update major
+        ;;
+    update-minor)
+        update minor
+        ;;
+    update-revision)
+        update revision
         ;;
     *)
         abort "no such command \`$SUBCOMMAND'"
