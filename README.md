@@ -23,6 +23,11 @@ Supported commands is:
 - local
 - prefix
 
+Original subcommands is:
+- update-major:    Update the major version of the currently active version
+- update-minor:    Update the minor version of the currently active version
+- update-revision: Update the revision of the currently active version
+
 ## Installation
 
 Replaces '**env' with 'pyenv', 'rbenv', etc.
@@ -44,7 +49,7 @@ Install latest version of Python.
 Install 2.7-based version of Python.
 
     $ pyenv latest install 2.7
-    Lateset version is '2.7.15'
+    Latest version is '2.7.15'
     Downloading Python-2.7.15.tar.xz...
     -> https://www.python.org/ftp/python/2.7.15/Python-2.7.15.tar.xz
     Installing Python-2.7.15...
@@ -65,6 +70,48 @@ Uninstall all expect the latest 2.7-based version of Python.
       2.7.15
       3.7.1
     * 3.7.2 (set by /home/username/.pyenv/versions/2.7.15)
+
+Update the major version, minor version or revision of the currently active version
+to the latest.
+
+    $ pyenv install --list
+    ...
+    3.6.15
+    ...
+    3.9.10
+    ...
+    3.10.2
+    ...
+    $ pyenv global
+    3.6.0
+    $ pyenv latest update-revision
+    Latest version is '3.6.15'
+    Downloading Python-3.6.15.tar.xz...
+    -> https://www.python.org/ftp/python/3.6.15/Python-3.6.15.tar.xz
+    Installing Python-3.6.15...
+    ...
+    Installed Python-3.6.15 to /home/username/.pyenv/versions/3.6.15
+    $ pyenv global
+    3.6.15
+    $ pyenv local 3.9.0
+    $ pyenv latest update-revision
+    Latest version is '3.9.10'
+    Downloading Python-3.9.10.tar.xz...
+    -> https://www.python.org/ftp/python/3.9.10/Python-3.9.10.tar.xz
+    Installing Python-3.9.10...
+    Installed Python-3.9.10 to /home/username/.pyenv/versions/3.9.10
+    $ pyenv local
+    3.9.10
+    $ pyenv latest update-minor
+    Latest version is '3.10.2'
+    Downloading Python-3.10.2.tar.xz...
+    -> https://www.python.org/ftp/python/3.10.2/Python-3.10.2.tar.xz
+    Installing Python-3.10.2...
+    Installed Python-3.10.2 to /home/username/.pyenv/versions/3.10.2
+    $ pyenv local
+    3.10.2
+    $ pyenv global
+    3.6.15
 
 Set the global Python latest version.
 
