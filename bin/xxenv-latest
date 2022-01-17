@@ -31,6 +31,10 @@ COMMAND=${0##*/}; COMMAND=${COMMAND%%-*}
 SUBCOMMAND="$1"
 
 # Provide pyenv completions
+# Provide rbenv completions
+# Provide nodenv completions
+# Provide goenv completions
+# Provide phpenv completions
 if [ "$1" = "--complete" ]; then
     shift 1
     if [[ -z $1 ]]; then
