@@ -24,7 +24,7 @@
 set -e
 [ -n "$PYENV_DEBUG" ] && set -b
 
-XXENV_LATEST_VERSION="0.1.0"
+XXENV_LATEST_VERSION="0.2.1"
 DEFAULT_QUERY="[0-9]+"
 
 COMMAND=${0##*/}; COMMAND=${COMMAND%%-*}
