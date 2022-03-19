@@ -9,6 +9,7 @@ This **env plugin replaces the version specified in the argument with the latest
 - [nodenv](https://github.com/nodenv/nodenv) (Required [node-build](https://github.com/nodenv/node-build) to use ```nodenv latest install``` or ```nodenv latest uninstall```)
 - [goenv](https://github.com/syndbg/goenv)
 - [phpenv](https://github.com/phpenv/phpenv) (Required [php-build](https://github.com/php-build/php-build) to use ```phpenv latest install``` or ```phpenv latest uninstall```)
+- [luaenv](https://github.com/cehoffman/luaenv) (Required [lua-build](https://github.com/cehoffman/lua-build) to use ```luaenv latest install``` or ```luaenv latest uninstall```)
 
 ## Usage
 
