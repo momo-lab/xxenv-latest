@@ -22,7 +22,7 @@
 #   update-minor            Update the minor version of the currently active version
 #   update-revision         Update the revision of the currently active version
 set -e
-[ -n "$PYENV_DEBUG" ] && set -b
+[[ -v PYENV_DEBUG ]] && set -b
 
 XXENV_LATEST_VERSION="0.2.1"
 DEFAULT_QUERY="[0-9]+"
@@ -35,7 +35,7 @@ SUBCOMMAND="$1"
 # Provide nodenv completions
 # Provide goenv completions
 # Provide phpenv completions
-if [ "$1" = "--complete" ]; then
+if [[ $1 == --complete ]]; then
     shift 1
     if [[ -z $1 ]]; then
         echo install
@@ -52,14 +52,14 @@ if [ "$1" = "--complete" ]; then
     else
         SUBCOMMAND=$1
         shift 1
-        $COMMAND $SUBCOMMAND --complete $*
+        "$COMMAND-$SUBCOMMAND" --complete "$@"
     fi
     exit
 fi
 
 abort() {
     {
-        if [ "$#" -eq 0 ]; then
+        if (($# == 0)); then
             cat -
         else
             echo "$COMMAND: $*"
@@ -73,15 +73,14 @@ version() {
 }
 
 get_server_version() {
-  local query=$1
-  [[ -z $query ]] && query=$DEFAULT_QUERY
-  install_opts="--list"
+  local query=${1:-$DEFAULT_QUERY}
+  local install_opts="--list"
   if [[ "$COMMAND" == "rbenv" ]]; then
-    $COMMAND install --help | grep -- --list-all 2>&1 > /dev/null \
+    "$COMMAND"-install --help | grep -q -- --list-all \
       && install_opts="--list-all"
   fi
 
-  $COMMAND install $install_opts 2> /dev/null \
+  "$COMMAND"-install $install_opts 2> /dev/null \
     | grep -vE "(^Available versions:|-src|-dev|-latest|-stm|[-\.]rc|-alpha|-beta|[-\.]pre|-next|(a|b|c)[0-9]+$|snapshot|master|-nightly)" \
     | grep -E "^\s*${query/./\\.}\b" \
     | sed 's/^[[:space:]]*//' \
@@ -90,9 +89,8 @@ get_server_version() {
 }
 
 get_local_versions() {
-  local query=$1
-  [[ -z $query ]] && query=$DEFAULT_QUERY
-  $COMMAND versions --skip-aliases \
+  local query=${1:-$DEFAULT_QUERY}
+  "$COMMAND"-versions --skip-aliases \
     | sed -e 's/^\*//' -e 's/^[[:space:]]*//' -e 's/ (set by.*$//' \
     | grep -v "/envs" \
     | grep -E "^\s*$query" \
@@ -100,28 +98,30 @@ get_local_versions() {
 }
 
 get_local_version() {
-    get_local_versions $* | tail -1
+    get_local_versions "$@" | tail -1
 }
 
 print_version() {
-    local version=$(get_$1_version $2)
+    local version
+    version=$(get_"$1"_version "$2")
     [[ -z $version ]] && abort "Version '$2' is not found."
-    echo $version
+    echo "$version"
 }
 
 latest() {
     local getcmd=get_$1_version; shift 1
-    local new_args
+    local -a new_args
     local version
+    local arg
     for arg; do
         case "$arg" in
             -*)
-                new_args="$new_args $arg"
+                new_args+=("$arg")
                 ;;
             *)
-                version=$($getcmd $arg)
+                version=$($getcmd "$arg")
                 [[ -z $version ]] && abort "Version '$arg' is not found."
-                new_args="$new_args $version"
+                new_args+=("$version")
                 ;;
         esac
         shift 1
@@ -129,18 +129,21 @@ latest() {
     if [[ -z $version ]]; then
         version=$($getcmd)
         [[ -z $version ]] && abort "Version is not found."
-        new_args="$new_args $version"
+        new_args+=("$version")
     fi
 
     echo "Latest version is '$version'"
-    $COMMAND $SUBCOMMAND $new_args
+    "$COMMAND-$SUBCOMMAND" "${new_args[@]}"
 }
 
 uninstall_not_latest() {
+    local arg
+    local -a new_args
+    local version_prefix
     for arg; do
         case "$arg" in
             -*)
-                new_args="$new_args $arg"
+                new_args+=("$arg")
                 ;;
             *)
                 version_prefix=$arg
@@ -148,63 +151,67 @@ uninstall_not_latest() {
         esac
         shift 1
     done
-    for version in $(get_local_versions $version_prefix | sed '$ d'); do
-        $COMMAND uninstall $new_args $version
+    local version
+    for version in $(get_local_versions "$version_prefix" | sed '$ d'); do
+        "$COMMAND"-uninstall "${new_args[@]}" "$version"
     done
 }
 
 update() {
     local version_type=$1; shift
     local mode=local
-    local now_version=$($COMMAND local 2> /dev/null)
+    local now_version
+    now_version=$("$COMMAND"-local 2> /dev/null)
     if [[ -z "$now_version" ]]; then
         mode=global
-        now_version=$($COMMAND global)
+        now_version=$("$COMMAND"-global)
     fi
-    [[ "$now_version" == "system" ]] && abort "Curretly version is 'system'."
+    [[ "$now_version" == "system" ]] && abort "Currently version is 'system'."
+    local query
     case "$version_type" in
         major)
-            local query=$(echo $now_version | sed -e 's/[0-9]\+\.[0-9]\+\.[0-9]\+$//')
+            query=$(echo "$now_version" | sed -e 's/[0-9]\+\.[0-9]\+\.[0-9]\+$//')
             ;;
         minor)
-            local query=$(echo $now_version | sed -e 's/\.[0-9]\+\.[0-9]\+$//')
+            query=$(echo "$now_version" | sed -e 's/\.[0-9]\+\.[0-9]\+$//')
             ;;
         revision)
-            local query=$(echo $now_version | sed -e 's/\.[0-9]\+$//')
+            query=$(echo "$now_version" | sed -e 's/\.[0-9]\+$//')
             ;;
     esac
-    local new_version=$(print_version server $query)
+    local new_version
+    new_version=$(print_version server "$query")
     echo "Latest version is '$new_version'"
-    $COMMAND install --skip-existing $new_version
-    $COMMAND $mode $new_version
+    "$COMMAND"-install --skip-existing "$new_version"
+    "$COMMAND-$mode" "$new_version"
 }
 
 shift 1
 case "$SUBCOMMAND" in
     "")
         version
-        $COMMAND help latest
+        "$COMMAND"-help latest
         ;;
     -h | --help)
-        $COMMAND help latest
+        "$COMMAND"-help latest
         ;;
     -v | --version)
         version
         ;;
     -p | --print)
-        print_version server $*
+        print_version server "$@"
         ;;
     -P | --print-installed)
-        print_version local $*
+        print_version local "$@"
         ;;
     install)
-        latest server $*
+        latest server "$@"
         ;;
     uninstall)
-        uninstall_not_latest $*
+        uninstall_not_latest "$@"
         ;;
     global | local | prefix)
-        latest local $*
+        latest local "$@"
         ;;
     update-major)
         update major
