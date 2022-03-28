@@ -74,7 +74,7 @@ version() {
 
 get_server_version() {
   local query=${1:-$DEFAULT_QUERY}
-  install_opts="--list"
+  local install_opts="--list"
   if [[ "$COMMAND" == "rbenv" ]]; then
     "$COMMAND"-install --help | grep -q -- --list-all \
       && install_opts="--list-all"
@@ -112,6 +112,7 @@ latest() {
     local getcmd=get_$1_version; shift 1
     local new_args
     local version
+    local arg
     for arg; do
         case "$arg" in
             -*)
@@ -136,6 +137,9 @@ latest() {
 }
 
 uninstall_not_latest() {
+    local arg
+    local new_args
+    local version_prefix
     for arg; do
         case "$arg" in
             -*)
@@ -147,6 +151,7 @@ uninstall_not_latest() {
         esac
         shift 1
     done
+    local version
     for version in $(get_local_versions "$version_prefix" | sed '$ d'); do
         "$COMMAND"-uninstall "$new_args" "$version"
     done
