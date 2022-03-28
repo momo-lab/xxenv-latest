@@ -102,7 +102,8 @@ get_local_version() {
 }
 
 print_version() {
-    local version=$(get_"$1"_version "$2")
+    local version
+    version=$(get_"$1"_version "$2")
     [[ -z $version ]] && abort "Version '$2' is not found."
     echo "$version"
 }
@@ -154,24 +155,27 @@ uninstall_not_latest() {
 update() {
     local version_type=$1; shift
     local mode=local
-    local now_version=$("$COMMAND"-local 2> /dev/null)
+    local now_version
+    now_version=$("$COMMAND"-local 2> /dev/null)
     if [[ -z "$now_version" ]]; then
         mode=global
         now_version=$("$COMMAND"-global)
     fi
     [[ "$now_version" == "system" ]] && abort "Currently version is 'system'."
+    local query
     case "$version_type" in
         major)
-            local query=$(echo "$now_version" | sed -e 's/[0-9]\+\.[0-9]\+\.[0-9]\+$//')
+            query=$(echo "$now_version" | sed -e 's/[0-9]\+\.[0-9]\+\.[0-9]\+$//')
             ;;
         minor)
-            local query=$(echo "$now_version" | sed -e 's/\.[0-9]\+\.[0-9]\+$//')
+            query=$(echo "$now_version" | sed -e 's/\.[0-9]\+\.[0-9]\+$//')
             ;;
         revision)
-            local query=$(echo "$now_version" | sed -e 's/\.[0-9]\+$//')
+            query=$(echo "$now_version" | sed -e 's/\.[0-9]\+$//')
             ;;
     esac
-    local new_version=$(print_version server "$query")
+    local new_version
+    new_version=$(print_version server "$query")
     echo "Latest version is '$new_version'"
     "$COMMAND"-install --skip-existing "$new_version"
     "$COMMAND-$mode" "$new_version"
