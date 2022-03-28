@@ -110,18 +110,18 @@ print_version() {
 
 latest() {
     local getcmd=get_$1_version; shift 1
-    local new_args
+    local -a new_args
     local version
     local arg
     for arg; do
         case "$arg" in
             -*)
-                new_args="$new_args $arg"
+                new_args+=("$arg")
                 ;;
             *)
                 version=$($getcmd "$arg")
                 [[ -z $version ]] && abort "Version '$arg' is not found."
-                new_args="$new_args $version"
+                new_args+=("$version")
                 ;;
         esac
         shift 1
@@ -129,21 +129,21 @@ latest() {
     if [[ -z $version ]]; then
         version=$($getcmd)
         [[ -z $version ]] && abort "Version is not found."
-        new_args="$new_args $version"
+        new_args+=("$version")
     fi
 
     echo "Latest version is '$version'"
-    "$COMMAND-$SUBCOMMAND" "$new_args"
+    "$COMMAND-$SUBCOMMAND" "${new_args[@]}"
 }
 
 uninstall_not_latest() {
     local arg
-    local new_args
+    local -a new_args
     local version_prefix
     for arg; do
         case "$arg" in
             -*)
-                new_args="$new_args $arg"
+                new_args+=("$arg")
                 ;;
             *)
                 version_prefix=$arg
@@ -153,7 +153,7 @@ uninstall_not_latest() {
     done
     local version
     for version in $(get_local_versions "$version_prefix" | sed '$ d'); do
-        "$COMMAND"-uninstall "$new_args" "$version"
+        "$COMMAND"-uninstall "${new_args[@]}" "$version"
     done
 }
 
