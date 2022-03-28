@@ -22,7 +22,7 @@
 #   update-minor            Update the minor version of the currently active version
 #   update-revision         Update the revision of the currently active version
 set -e
-[ -n "$PYENV_DEBUG" ] && set -b
+[[ -v PYENV_DEBUG ]] && set -b
 
 XXENV_LATEST_VERSION="0.2.1"
 DEFAULT_QUERY="[0-9]+"
@@ -59,7 +59,7 @@ fi
 
 abort() {
     {
-        if [ "$#" -eq 0 ]; then
+        if (($# == 0)); then
             cat -
         else
             echo "$COMMAND: $*"
@@ -73,8 +73,7 @@ version() {
 }
 
 get_server_version() {
-  local query=$1
-  [[ -z $query ]] && query=$DEFAULT_QUERY
+  local query=${1:-$DEFAULT_QUERY}
   install_opts="--list"
   if [[ "$COMMAND" == "rbenv" ]]; then
     "$COMMAND"-install --help | grep -- --list-all 2>&1 > /dev/null \
@@ -90,8 +89,7 @@ get_server_version() {
 }
 
 get_local_versions() {
-  local query=$1
-  [[ -z $query ]] && query=$DEFAULT_QUERY
+  local query=${1:-$DEFAULT_QUERY}
   "$COMMAND"-versions --skip-aliases \
     | sed -e 's/^\*//' -e 's/^[[:space:]]*//' -e 's/ (set by.*$//' \
     | grep -v "/envs" \
