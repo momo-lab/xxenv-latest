@@ -52,7 +52,7 @@ if [ "$1" = "--complete" ]; then
     else
         SUBCOMMAND=$1
         shift 1
-        "$COMMAND-$SUBCOMMAND" --complete $*
+        "$COMMAND-$SUBCOMMAND" --complete "$@"
     fi
     exit
 fi
@@ -100,7 +100,7 @@ get_local_versions() {
 }
 
 get_local_version() {
-    get_local_versions $* | tail -1
+    get_local_versions "$@" | tail -1
 }
 
 print_version() {
@@ -192,19 +192,19 @@ case "$SUBCOMMAND" in
         version
         ;;
     -p | --print)
-        print_version server $*
+        print_version server "$@"
         ;;
     -P | --print-installed)
-        print_version local $*
+        print_version local "$@"
         ;;
     install)
-        latest server $*
+        latest server "$@"
         ;;
     uninstall)
-        uninstall_not_latest $*
+        uninstall_not_latest "$@"
         ;;
     global | local | prefix)
-        latest local $*
+        latest local "$@"
         ;;
     update-major)
         update major
