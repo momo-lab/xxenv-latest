@@ -35,7 +35,7 @@ SUBCOMMAND="$1"
 # Provide nodenv completions
 # Provide goenv completions
 # Provide phpenv completions
-if [ "$1" = "--complete" ]; then
+if [[ $1 == --complete ]]; then
     shift 1
     if [[ -z $1 ]]; then
         echo install
