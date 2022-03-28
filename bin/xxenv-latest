@@ -159,7 +159,7 @@ update() {
         mode=global
         now_version=$("$COMMAND"-global)
     fi
-    [[ "$now_version" == "system" ]] && abort "Curretly version is 'system'."
+    [[ "$now_version" == "system" ]] && abort "Currently version is 'system'."
     case "$version_type" in
         major)
             local query=$(echo $now_version | sed -e 's/[0-9]\+\.[0-9]\+\.[0-9]\+$//')
