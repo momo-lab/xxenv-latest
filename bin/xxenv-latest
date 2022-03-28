@@ -52,7 +52,7 @@ if [ "$1" = "--complete" ]; then
     else
         SUBCOMMAND=$1
         shift 1
-        $COMMAND $SUBCOMMAND --complete $*
+        "$COMMAND-$SUBCOMMAND" --complete $*
     fi
     exit
 fi
@@ -77,11 +77,11 @@ get_server_version() {
   [[ -z $query ]] && query=$DEFAULT_QUERY
   install_opts="--list"
   if [[ "$COMMAND" == "rbenv" ]]; then
-    $COMMAND install --help | grep -- --list-all 2>&1 > /dev/null \
+    "$COMMAND"-install --help | grep -- --list-all 2>&1 > /dev/null \
       && install_opts="--list-all"
   fi
 
-  $COMMAND install $install_opts 2> /dev/null \
+  "$COMMAND"-install $install_opts 2> /dev/null \
     | grep -vE "(^Available versions:|-src|-dev|-latest|-stm|[-\.]rc|-alpha|-beta|[-\.]pre|-next|(a|b|c)[0-9]+$|snapshot|master|-nightly)" \
     | grep -E "^\s*${query/./\\.}\b" \
     | sed 's/^[[:space:]]*//' \
@@ -92,7 +92,7 @@ get_server_version() {
 get_local_versions() {
   local query=$1
   [[ -z $query ]] && query=$DEFAULT_QUERY
-  $COMMAND versions --skip-aliases \
+  "$COMMAND"-versions --skip-aliases \
     | sed -e 's/^\*//' -e 's/^[[:space:]]*//' -e 's/ (set by.*$//' \
     | grep -v "/envs" \
     | grep -E "^\s*$query" \
@@ -133,7 +133,7 @@ latest() {
     fi
 
     echo "Latest version is '$version'"
-    $COMMAND $SUBCOMMAND $new_args
+    "$COMMAND-$SUBCOMMAND" $new_args
 }
 
 uninstall_not_latest() {
@@ -149,17 +149,17 @@ uninstall_not_latest() {
         shift 1
     done
     for version in $(get_local_versions $version_prefix | sed '$ d'); do
-        $COMMAND uninstall $new_args $version
+        "$COMMAND"-uninstall $new_args $version
     done
 }
 
 update() {
     local version_type=$1; shift
     local mode=local
-    local now_version=$($COMMAND local 2> /dev/null)
+    local now_version=$("$COMMAND"-local 2> /dev/null)
     if [[ -z "$now_version" ]]; then
         mode=global
-        now_version=$($COMMAND global)
+        now_version=$("$COMMAND"-global)
     fi
     [[ "$now_version" == "system" ]] && abort "Curretly version is 'system'."
     case "$version_type" in
@@ -175,18 +175,18 @@ update() {
     esac
     local new_version=$(print_version server $query)
     echo "Latest version is '$new_version'"
-    $COMMAND install --skip-existing $new_version
-    $COMMAND $mode $new_version
+    "$COMMAND"-install --skip-existing $new_version
+    "$COMMAND-$mode" $new_version
 }
 
 shift 1
 case "$SUBCOMMAND" in
     "")
         version
-        $COMMAND help latest
+        "$COMMAND"-help latest
         ;;
     -h | --help)
-        $COMMAND help latest
+        "$COMMAND"-help latest
         ;;
     -v | --version)
         version
