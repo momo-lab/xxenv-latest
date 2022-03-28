@@ -102,9 +102,9 @@ get_local_version() {
 }
 
 print_version() {
-    local version=$(get_$1_version $2)
+    local version=$(get_"$1"_version "$2")
     [[ -z $version ]] && abort "Version '$2' is not found."
-    echo $version
+    echo "$version"
 }
 
 latest() {
@@ -117,7 +117,7 @@ latest() {
                 new_args="$new_args $arg"
                 ;;
             *)
-                version=$($getcmd $arg)
+                version=$($getcmd "$arg")
                 [[ -z $version ]] && abort "Version '$arg' is not found."
                 new_args="$new_args $version"
                 ;;
@@ -131,7 +131,7 @@ latest() {
     fi
 
     echo "Latest version is '$version'"
-    "$COMMAND-$SUBCOMMAND" $new_args
+    "$COMMAND-$SUBCOMMAND" "$new_args"
 }
 
 uninstall_not_latest() {
@@ -146,8 +146,8 @@ uninstall_not_latest() {
         esac
         shift 1
     done
-    for version in $(get_local_versions $version_prefix | sed '$ d'); do
-        "$COMMAND"-uninstall $new_args $version
+    for version in $(get_local_versions "$version_prefix" | sed '$ d'); do
+        "$COMMAND"-uninstall "$new_args" "$version"
     done
 }
 
@@ -162,19 +162,19 @@ update() {
     [[ "$now_version" == "system" ]] && abort "Currently version is 'system'."
     case "$version_type" in
         major)
-            local query=$(echo $now_version | sed -e 's/[0-9]\+\.[0-9]\+\.[0-9]\+$//')
+            local query=$(echo "$now_version" | sed -e 's/[0-9]\+\.[0-9]\+\.[0-9]\+$//')
             ;;
         minor)
-            local query=$(echo $now_version | sed -e 's/\.[0-9]\+\.[0-9]\+$//')
+            local query=$(echo "$now_version" | sed -e 's/\.[0-9]\+\.[0-9]\+$//')
             ;;
         revision)
-            local query=$(echo $now_version | sed -e 's/\.[0-9]\+$//')
+            local query=$(echo "$now_version" | sed -e 's/\.[0-9]\+$//')
             ;;
     esac
-    local new_version=$(print_version server $query)
+    local new_version=$(print_version server "$query")
     echo "Latest version is '$new_version'"
-    "$COMMAND"-install --skip-existing $new_version
-    "$COMMAND-$mode" $new_version
+    "$COMMAND"-install --skip-existing "$new_version"
+    "$COMMAND-$mode" "$new_version"
 }
 
 shift 1
